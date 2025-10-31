@@ -1,14 +1,9 @@
+/*  =========  Main JS (responsive + scroll + slider + emailjs)  =========  */
+
+/* --------- Hero elements & slides --------- */
 const heroImg = document.getElementById("heroImg");
 const heroTitle = document.getElementById("heroTitle");
 const heroDesc = document.getElementById("heroDesc");
-
-const hamburger = document.getElementById('hamburger');
-const navMenu = document.getElementById('navMenu');
-
-hamburger?.addEventListener('click', () => {
-  hamburger.classList.toggle('active');
-  navMenu.classList.toggle('active');
-});
 
 const heroSlides = [
   {
@@ -34,113 +29,182 @@ const heroSlides = [
 ];
 
 let heroIndex = 0;
-
 function changeHeroSlide() {
-  heroImg.classList.remove('active'); // fade out
+  if (!heroImg || !heroTitle || !heroDesc) return;
+  heroImg.style.opacity = 0;
   setTimeout(() => {
     heroImg.style.backgroundImage = heroSlides[heroIndex].bg;
     heroTitle.innerHTML = heroSlides[heroIndex].title;
     heroDesc.innerHTML = heroSlides[heroIndex].desc;
-    heroImg.classList.add('active'); // fade in
+    heroImg.style.opacity = 1;
     heroIndex = (heroIndex + 1) % heroSlides.length;
-  }, 500); // half of transition duration
+  }, 400);
 }
-
-// Initialize first slide
 changeHeroSlide();
-setInterval(changeHeroSlide, 5000); // change every 5 seconds
+setInterval(changeHeroSlide, 5000);
 
-// SCROLL ANIMATION – WHO WE ARE
-window.addEventListener("scroll", () => {
-  const section = document.querySelector(".who-right");
-  if (!section) return;
-  const position = section.getBoundingClientRect().top;
-  const screenPosition = window.innerHeight / 1.3;
-  if (position < screenPosition) section.classList.add("visible");
-});
+/* --------- Hamburger & mobile nav --------- */
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('navMenu');
 
-const circleWrapper = document.querySelector('.circle-wrapper');
-function revealCircle() {
-  if (!circleWrapper) return;
-  const circleTop = circleWrapper.getBoundingClientRect().top;
-  const triggerPoint = window.innerHeight - 100;
-  if (circleTop < triggerPoint) circleWrapper.classList.add('visible');
+let mobileNav; // will store mobile nav element
+
+function createMobileNavIfNeeded() {
+  // create a mobile nav container if not present
+  if (!mobileNav) {
+    mobileNav = document.createElement('nav');
+    mobileNav.className = 'nav-mobile';
+    mobileNav.setAttribute('aria-hidden', 'true');
+
+    // clone links from desktop nav
+    const desktopLinks = document.querySelectorAll('#navMenu a');
+    desktopLinks.forEach(a => {
+      const copy = a.cloneNode(true);
+      mobileNav.appendChild(copy);
+    });
+
+    document.body.appendChild(mobileNav);
+  }
 }
-window.addEventListener('scroll', revealCircle);
-revealCircle();
 
+hamburger?.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  const expanded = hamburger.classList.contains('active');
+  hamburger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 
-
-// Scroll fade-in
-window.addEventListener('scroll', () => {
-  const sectionTop = container?.getBoundingClientRect().top;
-  const trigger = window.innerHeight * 0.85;
-  if (sectionTop < trigger) {
-    container?.classList.add('visible');
-    title?.classList.add('visible');
+  createMobileNavIfNeeded();
+  if (mobileNav) {
+    if (expanded) {
+      mobileNav.style.display = 'block';
+      mobileNav.setAttribute('aria-hidden', 'false');
+    } else {
+      mobileNav.style.display = 'none';
+      mobileNav.setAttribute('aria-hidden', 'true');
+    }
   }
 });
 
-
-// Scroll Animation for Trusted Section
-const fades = document.querySelectorAll(".fade-up, .fade-left, .fade-right, .fade-in");
-
-window.addEventListener("scroll", () => {
-  const triggerBottom = window.innerHeight * 0.85;
-  fades.forEach(el => {
-    const rect = el.getBoundingClientRect().top;
-    if (rect < triggerBottom) {
-      el.classList.add("show");
-    }
-  });
+// Click outside to close mobile nav
+document.addEventListener('click', (e) => {
+  if (!mobileNav) return;
+  if (!hamburger.contains(e.target) && !mobileNav.contains(e.target)) {
+    hamburger.classList.remove('active');
+    mobileNav.style.display = 'none';
+    hamburger.setAttribute('aria-expanded', 'false');
+  }
 });
 
+/* --------- Scroll animations for who-we-are and fades --------- */
+const circleWrapper = document.querySelector('.circle-wrapper');
+const whoRight = document.querySelector('.who-right');
 
+function revealOnScroll() {
+  if (circleWrapper) {
+    const top = circleWrapper.getBoundingClientRect().top;
+    const trigger = window.innerHeight - 100;
+    if (top < trigger) circleWrapper.classList.add('visible');
+  }
+  if (whoRight) {
+    const top2 = whoRight.getBoundingClientRect().top;
+    const trigger2 = window.innerHeight / 1.3;
+    if (top2 < trigger2) whoRight.classList.add('visible');
+  }
 
+  // generic fades
+  document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in').forEach(el => {
+    const rect = el.getBoundingClientRect().top;
+    const trigger = window.innerHeight * 0.85;
+    if (rect < trigger) el.classList.add('show');
+  });
+}
 
+window.addEventListener('scroll', revealOnScroll);
+window.addEventListener('load', revealOnScroll);
+
+/* --------- Slider prev/next behaviour --------- */
 const slider = document.getElementById("slider");
 const prev = document.getElementById("prev");
 const next = document.getElementById("next");
 
-let scrollAmount = 0;
-const scrollStep = slider.clientWidth * 0.9;
+function safeScrollStep() {
+  if (!slider) return 300;
+  // choose step based on slider width and card width
+  const card = slider.querySelector('.car-card');
+  if (card) return card.clientWidth + 16;
+  return Math.floor(slider.clientWidth * 0.9);
+}
 
-next.addEventListener("click", () => {
-  slider.scrollBy({ left: scrollStep, behavior: "smooth" });
+next?.addEventListener("click", () => {
+  if (!slider) return;
+  slider.scrollBy({ left: safeScrollStep(), behavior: "smooth" });
 });
-prev.addEventListener("click", () => {
-  slider.scrollBy({ left: -scrollStep, behavior: "smooth" });
-});
-
-
-
-
-// ====== EMAILJS CONFIG ======
-(function(){
-  emailjs.init("CA0GbM3c8-LqU_F1_"); // 🔹 Replace with your EmailJS Public Key
-})();
-
-document.getElementById("enquiryForm").addEventListener("submit", function(e){
-  e.preventDefault();
-
-  emailjs.sendForm("service_qrcz698", "template_qncp3l9", this)
-    .then(() => {
-      alert("Your enquiry has been sent successfully ✅");
-      this.reset();
-    })
-    .catch(err => {
-      console.error("Error:", err);
-      alert("Failed to send message. Try again later ❌");
-    });
+prev?.addEventListener("click", () => {
+  if (!slider) return;
+  slider.scrollBy({ left: -safeScrollStep(), behavior: "smooth" });
 });
 
-// ====== SCROLL ANIMATION ======
-window.addEventListener('scroll', () => {
-  document.querySelectorAll('.fade-in').forEach(el => {
-    const pos = el.getBoundingClientRect().top;
-    const winHeight = window.innerHeight;
-    if(pos < winHeight - 100){
-      el.classList.add('show');
+/* --------- EmailJS form send (replace placeholders) --------- */
+/*
+  IMPORTANT:
+  1) Replace PUBLIC_KEY, SERVICE_ID, TEMPLATE_ID with your EmailJS values.
+  2) Make sure the template in EmailJS uses these variable names:
+     {{first_name}}, {{last_name}}, {{email}}, {{phone}}, {{company}}, {{message}}, {{interest}}, {{city}}
+*/
+
+// Put your real values here:
+const EMAILJS_PUBLIC_KEY = "PUBLIC_KEY_REPLACE_ME";
+const EMAILJS_SERVICE_ID = "SERVICE_ID_REPLACE_ME";
+const EMAILJS_TEMPLATE_ID = "TEMPLATE_ID_REPLACE_ME";
+
+try {
+  if (window.emailjs && typeof emailjs.init === 'function' && EMAILJS_PUBLIC_KEY !== "PUBLIC_KEY_REPLACE_ME") {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  } else if (window.emailjs && typeof emailjs.init === 'function') {
+    // initialize even if placeholder (keeps API available) - but it's better to replace with real key
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+} catch (err) {
+  // emailjs script not loaded or error - will still handle below with checks
+  console.warn("EmailJS init warning:", err);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('enquiryForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // Basic UI feedback
+    const submitBtn = this.querySelector('.submit-btn');
+    const oldText = submitBtn ? submitBtn.innerText : null;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Sending...";
     }
+
+    // Ensure emailjs available
+    if (!window.emailjs || !emailjs.sendForm) {
+      alert("Email service not available. Make sure EmailJS script is loaded and PUBLIC_KEY is set.");
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = oldText; }
+      return;
+    }
+
+    // Send form using sendForm
+    emailjs.sendForm(service_qrcz698, template_qncp3l9, this)
+      .then(() => {
+        alert("✅ Your enquiry has been sent successfully!");
+        this.reset();
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = oldText; }
+      })
+      .catch((err) => {
+        console.error("EmailJS Error:", err);
+        alert("❌ Failed to send message. Please try again later.");
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = oldText; }
+      });
   });
 });
+
+/* --------- minor graceful JS safety fixes --------- */
+// make sure hero element visible after DOM loaded
+if (heroImg) heroImg.style.opacity = 1;
