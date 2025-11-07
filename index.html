@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Leo MedHub</title>
 
   <!-- Styles -->
@@ -14,14 +14,12 @@
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-
 </head>
 <body>
-  
   <header>
     <div class="logo">
       <img src="asset/image/bg logo.png" alt="Leo Logo" />
-      <h2>Leo MedHub</h2>
+      <!-- <h2>Leo MedHub</h2> -->
     </div>
 
     <div class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
@@ -53,7 +51,8 @@
 
       <div class="hero-img" id="heroImg" aria-hidden="true"></div>
     </section>
-    
+
+
     <section class="who-we-are">
       <div class="who-container">
         <div class="who-left">
@@ -80,7 +79,6 @@
 
     <section class="car-section animate-on-scroll">
       <h2>What We Offer</h2>
-      
 
       <div class="slider-wrapper">
         <button class="arrow" id="prev" aria-label="Previous slide">&#8592;</button>
@@ -262,19 +260,16 @@
     </div>
   </footer>
 
-  <!-- EmailJS script (CDN) -->
+  <!-- EmailJS script (CDN) - KEEP this BEFORE your main script.js -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-  <!-- Initialize EmailJS -->
-  <script>
-    (function() {
-      emailjs.init("CA0GbM3c8-LqU_F1_"); // 👈 replace with your key
-    })();
-  </script>
+  <!--
+     Paste your public key here if you want EmailJS to initialize from HTML.
+     You can also initialize from js/script.js (both ok). Example:
+     <script> (function(){ emailjs.init("YOUR_PUBLIC_KEY"); })(); </script>
+  -->
 
   <!-- Main JS -->
   <script src="js/script.js"></script>
 </body>
-</html>
-
 </html>

@@ -13,7 +13,7 @@ const heroSlides = [
   },
   {
     bg: "url('asset/image/revenue hm.jpeg')",
-    title: "Get Expert <span>Revenue Cycle </span><br><span>Management</span> <br>Services",
+    title: "Get Expert <span>Revenue Cycle</span><br><span>Management</span> <br>Services",
     desc: "We help hospitals and clinics maximize revenue efficiency with smart automation and reduced claim denials."
   },
   {
@@ -29,42 +29,51 @@ const heroSlides = [
 ];
 
 let heroIndex = 0;
+
 function changeHeroSlide() {
   if (!heroImg || !heroTitle || !heroDesc) return;
   heroImg.style.opacity = 0;
+  heroTitle.style.opacity = 0;
+  heroDesc.style.opacity = 0;
+
   setTimeout(() => {
     heroImg.style.backgroundImage = heroSlides[heroIndex].bg;
     heroTitle.innerHTML = heroSlides[heroIndex].title;
     heroDesc.innerHTML = heroSlides[heroIndex].desc;
+
     heroImg.style.opacity = 1;
+    heroTitle.style.opacity = 1;
+    heroDesc.style.opacity = 1;
+
     heroIndex = (heroIndex + 1) % heroSlides.length;
-  }, 400);
+  }, 500);
 }
+
 changeHeroSlide();
 setInterval(changeHeroSlide, 5000);
+
 
 /* --------- Hamburger & mobile nav --------- */
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
 
-let mobileNav; // will store mobile nav element
+let mobileNav = null;
 
 function createMobileNavIfNeeded() {
-  // create a mobile nav container if not present
-  if (!mobileNav) {
-    mobileNav = document.createElement('nav');
-    mobileNav.className = 'nav-mobile';
-    mobileNav.setAttribute('aria-hidden', 'true');
+  if (mobileNav) return mobileNav;
 
-    // clone links from desktop nav
-    const desktopLinks = document.querySelectorAll('#navMenu a');
-    desktopLinks.forEach(a => {
-      const copy = a.cloneNode(true);
-      mobileNav.appendChild(copy);
-    });
+  mobileNav = document.createElement('nav');
+  mobileNav.className = 'nav-mobile';
+  mobileNav.setAttribute('aria-hidden', 'true');
 
-    document.body.appendChild(mobileNav);
-  }
+  const desktopLinks = document.querySelectorAll('#navMenu a');
+  desktopLinks.forEach(a => {
+    const copy = a.cloneNode(true);
+    mobileNav.appendChild(copy);
+  });
+
+  document.body.appendChild(mobileNav);
+  return mobileNav;
 }
 
 hamburger?.addEventListener('click', () => {
@@ -72,15 +81,13 @@ hamburger?.addEventListener('click', () => {
   const expanded = hamburger.classList.contains('active');
   hamburger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 
-  createMobileNavIfNeeded();
-  if (mobileNav) {
-    if (expanded) {
-      mobileNav.style.display = 'block';
-      mobileNav.setAttribute('aria-hidden', 'false');
-    } else {
-      mobileNav.style.display = 'none';
-      mobileNav.setAttribute('aria-hidden', 'true');
-    }
+  const nav = createMobileNavIfNeeded();
+  if (expanded) {
+    nav.style.display = 'block';
+    nav.setAttribute('aria-hidden', 'false');
+  } else {
+    nav.style.display = 'none';
+    nav.setAttribute('aria-hidden', 'true');
   }
 });
 
@@ -110,7 +117,6 @@ function revealOnScroll() {
     if (top2 < trigger2) whoRight.classList.add('visible');
   }
 
-  // generic fades
   document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in').forEach(el => {
     const rect = el.getBoundingClientRect().top;
     const trigger = window.innerHeight * 0.85;
@@ -128,7 +134,6 @@ const next = document.getElementById("next");
 
 function safeScrollStep() {
   if (!slider) return 300;
-  // choose step based on slider width and card width
   const card = slider.querySelector('.car-card');
   if (card) return card.clientWidth + 16;
   return Math.floor(slider.clientWidth * 0.9);
@@ -143,31 +148,30 @@ prev?.addEventListener("click", () => {
   slider.scrollBy({ left: -safeScrollStep(), behavior: "smooth" });
 });
 
-/* --------- EmailJS form send (replace placeholders) --------- */
+/* --------- EmailJS form send (placeholders) --------- */
 /*
-  IMPORTANT:
-  1) Replace PUBLIC_KEY, SERVICE_ID, TEMPLATE_ID with your EmailJS values.
-  2) Make sure the template in EmailJS uses these variable names:
-     {{first_name}}, {{last_name}}, {{email}}, {{phone}}, {{company}}, {{message}}, {{interest}}, {{city}}
+  NOTES:
+  - You will paste your real values below when ready.
+  - Keep these three values as strings.
+  - Make sure your EmailJS template uses the variables:
+      {{first_name}}, {{last_name}}, {{email}}, {{phone}}, {{company}}, {{message}}, {{interest}}, {{city}}
 */
 
-// Put your real values here:
-const EMAILJS_PUBLIC_KEY = "PUBLIC_KEY_REPLACE_ME";
-const EMAILJS_SERVICE_ID = "SERVICE_ID_REPLACE_ME";
-const EMAILJS_TEMPLATE_ID = "TEMPLATE_ID_REPLACE_ME";
+// REPLACE these placeholders with your values (keep quotes)
+const EMAILJS_PUBLIC_KEY = "PUBLIC_KEY_REPLACE_ME";   // e.g. "CA0GbM3c8-LqU_F1_"
+const EMAILJS_SERVICE_ID = "SERVICE_ID_REPLACE_ME";  // e.g. "service_qrcz698"
+const EMAILJS_TEMPLATE_ID = "TEMPLATE_ID_REPLACE_ME";// e.g. "template_qncp3l9"
 
-try {
-  if (window.emailjs && typeof emailjs.init === 'function' && EMAILJS_PUBLIC_KEY !== "PUBLIC_KEY_REPLACE_ME") {
+// Initialize EmailJS if library loaded
+if (window.emailjs && typeof emailjs.init === 'function') {
+  try {
     emailjs.init(EMAILJS_PUBLIC_KEY);
-  } else if (window.emailjs && typeof emailjs.init === 'function') {
-    // initialize even if placeholder (keeps API available) - but it's better to replace with real key
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+  } catch (err) {
+    console.warn("EmailJS init failed (check PUBLIC KEY):", err);
   }
-} catch (err) {
-  // emailjs script not loaded or error - will still handle below with checks
-  console.warn("EmailJS init warning:", err);
 }
 
+// Form submission logic
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('enquiryForm');
   if (!form) return;
@@ -175,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    // Basic UI feedback
     const submitBtn = this.querySelector('.submit-btn');
     const oldText = submitBtn ? submitBtn.innerText : null;
     if (submitBtn) {
@@ -183,15 +186,15 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.innerText = "Sending...";
     }
 
-    // Ensure emailjs available
+    // ensure emailjs available
     if (!window.emailjs || !emailjs.sendForm) {
-      alert("Email service not available. Make sure EmailJS script is loaded and PUBLIC_KEY is set.");
+      alert("Email service not available. Make sure EmailJS script is loaded and PUBLIC KEY is set.");
       if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = oldText; }
       return;
     }
 
-    // Send form using sendForm
-    emailjs.sendForm(service_qrcz698, template_qncp3l9, this)
+    // send the form - SERVICE & TEMPLATE must be strings
+    emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, this)
       .then(() => {
         alert("✅ Your enquiry has been sent successfully!");
         this.reset();
@@ -206,5 +209,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* --------- minor graceful JS safety fixes --------- */
-// make sure hero element visible after DOM loaded
 if (heroImg) heroImg.style.opacity = 1;
