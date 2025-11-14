@@ -1,161 +1,107 @@
-/*  =========  Main JS (responsive + scroll + slider + emailjs)  =========  */
-
-/* --------- Hero elements & slides --------- */
 const heroImg = document.getElementById("heroImg");
 const heroTitle = document.getElementById("heroTitle");
 const heroDesc = document.getElementById("heroDesc");
 
+function img(srcD, srcM){ return window.innerWidth <= 600 ? `url('${srcM}')` : `url('${srcD}')`; }
+
 const heroSlides = [
-  {
-    bg: "url('asset/image/billing hm.jpg')",
-    title: "Get Expert <span>Medical</span><br><span>Billing</span> <br>Services",
-    desc: "At Leo MedHub, we make medical billing accurate, transparent, and fast. Our team ensures timely reimbursements, fewer errors, and less admin stress—so healthcare providers can focus on patient care."
-  },
-  {
-    bg: "url('asset/image/revenue hm.jpeg')",
-    title: "Get Expert <span>Revenue Cycle</span><br><span>Management</span> <br>Services",
-    desc: "We help hospitals and clinics maximize revenue efficiency with smart automation and reduced claim denials."
-  },
-  {
-    bg: "url('asset/image/medical coading  hm.jpg')",
-    title: "Get Expert <span>Medical</span><br><span>Coding</span> <br>Services",
-    desc: "Our platform is 100% HIPAA compliant, ensuring data security and patient confidentiality at all times."
-  },
-  {
-    bg: "url('asset/image/virtual hm.webp')",
-    title: "Get Expert <span>Virtual</span><br><span>Healthcare Staffing</span> <br>Services",
-    desc: "Our platform is 100% HIPAA compliant, ensuring data security and patient confidentiality at all times."
-  }
+  { bg: img('asset/image/billing hm.jpg','asset/image/billing sl.jpg'),
+    title:"Get Expert <span><br>Medical Billing</span><br> Services",
+    desc:"Accurate billing with faster reimbursements." },
+  { bg: img('asset/image/medical coading  hm.jpg','asset/image/coding ml.jpg'),
+    title:"Get Expert <span><br>Medical Coding</span><br> Services",
+    desc:"Accurate billing with faster reimbursements." },    
+  { bg: img('asset/image/revenue hm.jpeg','asset/image/revenue ml.jpg'),
+    title:"Maximize <span><br>Revenue Cycle</span><br>Efficiency",
+    desc:"Smart automation and reduced claim denials." }
 ];
 
-let heroIndex = 0;
-
-function changeHeroSlide() {
-  if (!heroImg || !heroTitle || !heroDesc) return;
+let i = 0;
+function switchHero(){
   heroImg.style.opacity = 0;
   heroTitle.style.opacity = 0;
   heroDesc.style.opacity = 0;
 
-  setTimeout(() => {
-    heroImg.style.backgroundImage = heroSlides[heroIndex].bg;
-    heroTitle.innerHTML = heroSlides[heroIndex].title;
-    heroDesc.innerHTML = heroSlides[heroIndex].desc;
+  setTimeout(()=>{
+    heroImg.style.backgroundImage = heroSlides[i].bg;
+    heroTitle.innerHTML = heroSlides[i].title;
+    heroDesc.innerHTML = heroSlides[i].desc;
 
     heroImg.style.opacity = 1;
     heroTitle.style.opacity = 1;
     heroDesc.style.opacity = 1;
 
-    heroIndex = (heroIndex + 1) % heroSlides.length;
-  }, 500);
+    i = (i+1) % heroSlides.length;
+  },450);
 }
 
-changeHeroSlide();
-setInterval(changeHeroSlide, 5000);
+switchHero();
+setInterval(switchHero, 5000);
 
-
-/* --------- Hamburger & mobile nav --------- */
-const hamburger = document.getElementById('hamburger');
-const navMenu = document.getElementById('navMenu');
-
-let mobileNav = null;
-
-function createMobileNavIfNeeded() {
-  if (mobileNav) return mobileNav;
-
-  mobileNav = document.createElement('nav');
-  mobileNav.className = 'nav-mobile';
-  mobileNav.setAttribute('aria-hidden', 'true');
-
-  const desktopLinks = document.querySelectorAll('#navMenu a');
-  desktopLinks.forEach(a => {
-    const copy = a.cloneNode(true);
-    mobileNav.appendChild(copy);
-  });
-
-  document.body.appendChild(mobileNav);
-  return mobileNav;
-}
-
-hamburger?.addEventListener('click', () => {
-  hamburger.classList.toggle('active');
-  const expanded = hamburger.classList.contains('active');
-  hamburger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-
-  const nav = createMobileNavIfNeeded();
-  if (expanded) {
-    nav.style.display = 'block';
-    nav.setAttribute('aria-hidden', 'false');
-  } else {
-    nav.style.display = 'none';
-    nav.setAttribute('aria-hidden', 'true');
-  }
-});
-
-// Click outside to close mobile nav
-document.addEventListener('click', (e) => {
-  if (!mobileNav) return;
-  if (!hamburger.contains(e.target) && !mobileNav.contains(e.target)) {
-    hamburger.classList.remove('active');
-    mobileNav.style.display = 'none';
-    hamburger.setAttribute('aria-expanded', 'false');
-  }
-});
-
-/* --------- Scroll animations for who-we-are and fades --------- */
-const circleWrapper = document.querySelector('.circle-wrapper');
-const whoRight = document.querySelector('.who-right');
-
-function revealOnScroll() {
-  if (circleWrapper) {
-    const top = circleWrapper.getBoundingClientRect().top;
-    const trigger = window.innerHeight - 100;
-    if (top < trigger) circleWrapper.classList.add('visible');
-  }
-  if (whoRight) {
-    const top2 = whoRight.getBoundingClientRect().top;
-    const trigger2 = window.innerHeight / 1.3;
-    if (top2 < trigger2) whoRight.classList.add('visible');
-  }
-
-  document.querySelectorAll('.fade-up, .fade-left, .fade-right, .fade-in').forEach(el => {
-    const rect = el.getBoundingClientRect().top;
-    const trigger = window.innerHeight * 0.85;
-    if (rect < trigger) el.classList.add('show');
+/* Smooth Scroll Reveal */
+const reveals = document.querySelectorAll('.smooth-reveal');
+function revealOnScroll(){
+  reveals.forEach(el=>{
+    if(el.getBoundingClientRect().top < window.innerHeight - 120){
+      el.classList.add('active');
+    }
   });
 }
+window.addEventListener("scroll", revealOnScroll);
+revealOnScroll();
 
-window.addEventListener('scroll', revealOnScroll);
-window.addEventListener('load', revealOnScroll);
+/* Who We Are Slide Reveal */
+function revealWho(){
+  let pos = document.querySelector(".who-we-are").getBoundingClientRect().top;
+  if(pos < window.innerHeight - 150){
+    document.querySelector(".circle-wrapper").classList.add("visible");
+    document.querySelector(".who-right").classList.add("visible");
+  }
+}
+window.addEventListener("scroll", revealWho);
+revealWho();
 
-/* --------- Slider prev/next behaviour --------- */
+/* Mobile Menu */
+document.getElementById("hamburger").onclick=()=>{
+  const m=document.getElementById("mobileMenu");
+  m.style.display= m.style.display==="flex" ? "none":"flex";
+};
+
+// animation
+function animateWhoWeAre() {
+  const circle = document.querySelector(".circle-wrapper");
+  const rightText = document.querySelector(".who-right");
+
+  const trigger = circle.getBoundingClientRect().top < window.innerHeight - 120;
+  if(trigger) {
+    circle.classList.add("visible");
+    rightText.classList.add("visible");
+  }
+}
+window.addEventListener("scroll", animateWhoWeAre);
+animateWhoWeAre();
+
+// Slider-Section
 const slider = document.getElementById("slider");
 const prev = document.getElementById("prev");
 const next = document.getElementById("next");
 
-function safeScrollStep() {
-  if (!slider) return 300;
-  const card = slider.querySelector('.car-card');
-  if (card) return card.clientWidth + 16;
-  return Math.floor(slider.clientWidth * 0.9);
+
+function safeScrollStep(){
+const card = slider.querySelector('.car-card');
+if(card) return card.clientWidth + 24;
+return 300;
 }
 
-next?.addEventListener("click", () => {
-  if (!slider) return;
-  slider.scrollBy({ left: safeScrollStep(), behavior: "smooth" });
+
+next.addEventListener("click",()=>{
+slider.scrollBy({ left:safeScrollStep(), behavior:"smooth" });
 });
-prev?.addEventListener("click", () => {
-  if (!slider) return;
-  slider.scrollBy({ left: -safeScrollStep(), behavior: "smooth" });
+prev.addEventListener("click",()=>{
+slider.scrollBy({ left:-safeScrollStep(), behavior:"smooth" });
 });
 
-/* --------- EmailJS form send (placeholders) --------- */
-/*
-  NOTES:
-  - You will paste your real values below when ready.
-  - Keep these three values as strings.
-  - Make sure your EmailJS template uses the variables:
-      {{first_name}}, {{last_name}}, {{email}}, {{phone}}, {{company}}, {{message}}, {{interest}}, {{city}}
-*/
+// contact us section
 
 // REPLACE these placeholders with your values (keep quotes)
 const EMAILJS_PUBLIC_KEY = "PUBLIC_KEY_REPLACE_ME";   // e.g. "CA0GbM3c8-LqU_F1_"
@@ -194,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // send the form - SERVICE & TEMPLATE must be strings
-    emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, this)
+    emailjs.sendForm(service_qrcz698, template_qncp3l9, this)
       .then(() => {
         alert("✅ Your enquiry has been sent successfully!");
         this.reset();
@@ -208,5 +154,3 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* --------- minor graceful JS safety fixes --------- */
-if (heroImg) heroImg.style.opacity = 1;
